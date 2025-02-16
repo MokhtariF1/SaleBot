@@ -1,9 +1,10 @@
-import re
+import random
 from telethon import TelegramClient, events,Button, types
 import config
 from pymongo import MongoClient
 import mimetypes
 from bson import ObjectId
+import time
 
 bot = TelegramClient("robot", config.API_ID, config.API_HASH,
                      proxy=None if config.PROXY is False else config.PROXY_ADDRESS)
@@ -18,6 +19,8 @@ db = connection["sale_bot"]
 users_collection = db["users"]
 post_collection = db["post"]
 config_coll = db["config"]
+msg_coll = db["msg"]
+answers_coll = db["answers"]
 main_buttons = [
     [
         Button.text(bot_text["buy"], resize=True),
@@ -76,7 +79,7 @@ async def start(event):
                     await conv.send_message(bot_text["share_phone_info"], buttons=phone_btns)
                     phone = await conv.get_response()
                     if phone.raw_text == bot_text["cancel"]:
-                        await conv.send_message(bot_text["canceled"])
+                        await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                         return
                     phone = phone.media
                     if phone is None or type(phone) != types.MessageMediaContact:
@@ -87,31 +90,31 @@ async def start(event):
                     name = await conv.get_response()
                     name = name.raw_text
                     if name == bot_text["cancel"]:
-                        await conv.send_message(bot_text["canceled"])
+                        await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                         return
                     await conv.send_message(bot_text["enter_business_name"], buttons=text_cancel_btn)
                     business_name = await conv.get_response()
                     business_name = business_name.raw_text
                     if business_name == bot_text["cancel"]:
-                        await conv.send_message(bot_text["canceled"])
+                        await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                         return
                     await conv.send_message(bot_text["enter_phone_number"], buttons=text_cancel_btn)
                     cart_phone = await conv.get_response()
                     cart_phone = cart_phone.raw_text
                     if cart_phone == bot_text["cancel"]:
-                        await conv.send_message(bot_text["canceled"])
+                        await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                         return
                     await conv.send_message(bot_text["enter_business_phone"], buttons=text_cancel_btn)
                     business_phone = await conv.get_response()
                     business_phone = business_phone.raw_text
                     if business_phone == bot_text["cancel"]:
-                        await conv.send_message(bot_text["canceled"])
+                        await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                         return
                     await conv.send_message(bot_text["enter_business_disc"], buttons=text_cancel_btn)
                     business_disc = await conv.get_response()
                     business_disc = business_disc.raw_text
                     if business_disc == bot_text["cancel"]:
-                        await conv.send_message(bot_text["canceled"])
+                        await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                         return
                     user = {
                         "is_seller": is_seller,
@@ -124,7 +127,7 @@ async def start(event):
                         "cart_phone": cart_phone,
                     }
                     users_collection.update_one({"user_id": user_id}, {"$set": user})
-                    await event.reply(bot_text["info_saved"])
+                    await event.reply(bot_text["info_saved"], buttons=Button.clear())
             else:
                 parameters = text.split(" ")
                 if len(parameters) > 1:
@@ -200,15 +203,23 @@ async def start(event):
                                         if int(user_id) == int(post_user_id):
                                             await event.reply(bot_text["cant_send_self"])
                                             return
-                                        name = find_user["name"]
                                         post_type = "موجود دارم" if find_post["post_type"] == "buy" else "⁉️ قیمت این پارچه چند ؟"
+                                        name = find_user["name"]
+                                        msg = {
+                                            "_id": random.randint(10000, 99999),
+                                            "user_id": user_id,
+                                            "post_id": find_post["_id"],
+                                            "text": post_type,
+                                            "to_user": post_user_id,
+                                        }
+                                        msg = msg_coll.insert_one(msg)
                                         user_phone_action = "+" + str(find_user["phone"]) if str(find_user["phone"]).startswith("+") is False else str(find_user["phone"])
                                         btn = [
                                             [
                                                 Button.url(bot_text["chat"], f"https://t.me/{user_phone_action}")
                                             ],
                                             [
-                                                Button.inline(bot_text["answer_msg"], str.encode("answer_msg:" + str(user_id) + ":" + str(find_post["_id"])))
+                                                Button.inline(bot_text["answer_msg"], str.encode("answer_msg:" + str(user_id) + ":" + str(find_post["_id"]) + ":" + str(msg.inserted_id)))
                                             ]
                                         ]
                                         action_text = bot_text["action_msg"].format(name=name, text=post_type, disc=find_post["caption"], msg_link=find_post["msg_link"])
@@ -386,7 +397,7 @@ async def rule_yes(event):
             await conv.send_message(bot_text["share_phone_info"], buttons=phone_btns)
             phone = await conv.get_response()
             if phone.raw_text == bot_text["cancel"]:
-                await conv.send_message(bot_text["canceled"])
+                await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                 return
             phone = phone.media
             if phone is None or type(phone) != types.MessageMediaContact:
@@ -397,31 +408,31 @@ async def rule_yes(event):
             name = await conv.get_response()
             name = name.raw_text
             if name == bot_text["cancel"]:
-                await conv.send_message(bot_text["canceled"])
+                await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                 return
             await conv.send_message(bot_text["enter_business_name"], buttons=text_cancel_btn)
             business_name = await conv.get_response()
             business_name = business_name.raw_text
             if business_name == bot_text["cancel"]:
-                await conv.send_message(bot_text["canceled"])
+                await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                 return
             await conv.send_message(bot_text["enter_phone_number"], buttons=text_cancel_btn)
             cart_phone = await conv.get_response()
             cart_phone = cart_phone.raw_text
             if cart_phone == bot_text["cancel"]:
-                await conv.send_message(bot_text["canceled"])
+                await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                 return
             await conv.send_message(bot_text["enter_business_phone"], buttons=text_cancel_btn)
             business_phone = await conv.get_response()
             business_phone = business_phone.raw_text
             if business_phone == bot_text["cancel"]:
-                await conv.send_message(bot_text["canceled"])
+                await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                 return
             await conv.send_message(bot_text["enter_business_disc"], buttons=text_cancel_btn)
             business_disc = await conv.get_response()
             business_disc = business_disc.raw_text
             if business_disc == bot_text["cancel"]:
-                await conv.send_message(bot_text["canceled"])
+                await conv.send_message(bot_text["canceled"], buttons=Button.clear())
                 return
             user = {
                 "is_seller": is_seller,
@@ -434,7 +445,7 @@ async def rule_yes(event):
                 "cart_phone": cart_phone,
             }
             users_collection.update_one({"user_id": user_id}, {"$set": user})
-            await event.reply(bot_text["info_saved"])
+            await event.reply(bot_text["info_saved"], buttons=Button.clear())
     else:
         await event.reply(bot_text["rule_before_conf"])
 @bot.on(events.CallbackQuery(data=b'rule_no'))
@@ -475,6 +486,7 @@ async def conf_post(event):
 async def answer_msg(event):
     user_id_get = event.data.decode().split(":")[1]
     post_id = event.data.decode().split(":")[2]
+    msg_id = event.data.decode().split(":")[3]
     find_user_get = users_collection.find_one({"user_id": int(user_id_get)})
     if find_user_get is None:
         await event.reply(bot_text["user_not_found"])
@@ -487,7 +499,7 @@ async def answer_msg(event):
             await conv.send_message(bot_text["error_chat_media"])
         answer = answer.text
         if answer == bot_text["cancel"]:
-            await conv.send_message(bot_text["canceled"])
+            await conv.send_message(bot_text["canceled"], buttons=Button.clear())
             return
         find_user = users_collection.find_one({"user_id": int(user_id)})
         if find_user is None:
@@ -503,13 +515,26 @@ async def answer_msg(event):
                 Button.url(bot_text["chat"], f"https://t.me/{user_phone}")
             ],
             [
-                Button.inline(bot_text["answer_msg"], str.encode("answer_msg:" + str(user_id) + ":" + str(find_post["_id"])))
+                Button.inline(bot_text["answer_msg"], str.encode("answer_msg:" + str(user_id) + ":" + str(find_post["_id"]) + ":" + msg_id))
             ]
         ]
-        msg = bot_text["answer_text"].format(name=find_user["name"], disc=find_post["caption"], msg_link=find_post["msg_link"], text=answer)
-        print(user_id_get)
-        await bot.send_message(int(user_id_get), msg, buttons=btn, parse_mode="html", link_preview=False)
-        await event.reply(bot_text["answer_sent"])
+        msg_ = bot_text["answer_text"].format(name=find_user["name"], disc=find_post["caption"], msg_link=find_post["msg_link"])
+        find_answers = answers_coll.find({"msg_id": msg_id}).sort("stamp")
+        for m in find_answers:
+            mt = bot_text["msg"].format(sender=m["user_name"], text=m["text"])
+            msg_ += mt
+        msg_ += "\n" + f'<blockquote>{find_user["name"]}: <b>{answer}</b></blockquote>'
+        answer_insert = {
+            "user_id": user_id,
+            "to_user": user_id_get,
+            "msg_id": msg_id,
+            "text": answer,
+            "user_name": find_user["name"],
+            "stamp": int(time.time()),
+        }
+        answers_coll.insert_one(answer_insert)
+        await bot.send_message(int(user_id_get), msg_, buttons=btn, link_preview=False)
+        await event.reply(bot_text["answer_sent"], buttons=Button.clear())
 @bot.on(events.CallbackQuery(pattern="delete_post:*"))
 async def delete_post(event):
     user_id = event.sender_id
@@ -521,6 +546,7 @@ async def delete_post(event):
     if user_id in config.ADMINS or int(find_post["user_id"]) == int(user_id):
         post_collection.delete_one({"_id": ObjectId(post_id)})
         await bot.delete_messages(config.CHANNEL_ID, int(find_post["msg_link"].split("/")[-1]))
+        await bot.delete_messages(config.CHANNEL_ID, int(find_post["msg_link"].split("/")[-1]) + 1)
         await event.reply(bot_text["suc_del"])
     else:
         await event.reply(bot_text["access_d"])
