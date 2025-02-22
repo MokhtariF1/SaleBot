@@ -60,7 +60,7 @@ bot_text = {
 📝 <i>توضیحات</i>:
 <blockquote><b>{caption}</b></blockquote>
 
-🎯 <a href="https://www.example.com/TaroPood">«تار و پود»  مرجع معرفی و خرید پارچه</a>""",
+🎯 <a href="https://t.me/taropood_textile">«تار و پود»  مرجع معرفی و خرید پارچه</a>""",
     "conf_btn": "✅ارسال آگهی به کانال",
     "post_not_found": "پست مورد نظر پیدا نشد❌",
     "sending_post_pre": "در حال ارسال پیش نمایش پست...",
@@ -88,7 +88,7 @@ bot_text = {
 
 ☑️  فعالیت:   {is_seller}
 
-🎯 <a href="https://www.example.com/TaroPood">«تار و پود»  مرجع معرفی و خرید پارچه</a>
+🎯 <a href="https://t.me/taropood_textile">«تار و پود»  مرجع معرفی و خرید پارچه</a>
 """,
     "action_msg": '''پیام جدید از <b>{name}</b>، در مورد آگهی 
 <blockquote><a href="{msg_link}"> {disc} </a></blockquote>,
