@@ -575,8 +575,8 @@ async def admin_post(event):
     post_type = "موجود دارم" if find_post["post_type"] == "buy" else "قیمت این پارچه چند⁉"
     buttons = [
         [
-            Button.url(bot_text["chat"], f"https://t.me/{phone}"),
-            Button.url(bot_text["cart"], f"https://t.me/{config.BOT_ID}?start=cart-{find_post["user_id"]}"),
+            Button.url(bot_text["chat"], f"""https://t.me/{phone}"""),
+            Button.url(bot_text["cart"], f"""https://t.me/{config.BOT_ID}?start=cart-{find_post["user_id"]}"""),
         ],
         [
             Button.url(post_type, f"https://t.me/{config.BOT_ID}?start=action-{post_id}"),
