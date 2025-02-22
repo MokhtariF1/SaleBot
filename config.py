@@ -1,13 +1,14 @@
-ENV = 0
+ENV = 1
 if ENV == 1:
-    BOT_TOKEN = "7920969267:AAGxT2VSBkjVyDo6_EfJY4m5cxpGDyH_QeQ"
+    BOT_TOKEN = "7522711447:AAGa4p2Mqr_ebnmi6Wb95gvppGteYXdOD9I"
     API_ID = 28482138
     API_HASH = "cdcd9c0f111f85feaafac50d1bc3d6a5"
     PROXY = False
     PROXY_ADDRESS = ("socks5", "127.0.0.1", 2080)
-    ADMINS = []
-    CHANNEL_ID = ""
-    BOT_ID = ""
+    ADMINS = [5415792594, 100168441]
+    CHANNEL_ID = "@taropood_textile"
+    CHANNEL_LINK = "https://t.me/taropood_textile"
+    BOT_ID = "Taropood_textile_bot"
 else:
     BOT_TOKEN = "7920969267:AAGxT2VSBkjVyDo6_EfJY4m5cxpGDyH_QeQ"
     API_ID = 28482138
