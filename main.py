@@ -472,7 +472,7 @@ async def conf_post(event):
         r = await event.reply(bot_text["sending_post"])
         s = await bot.send_message(config.CHANNEL_ID, post_caption, file=post_image, parse_mode="html")
         await r.delete()
-        post_collection.update_one({"_id": ObjectId(post_id)}, {"$set": {"conf": True, "in_channel": True, "msg_link": config.CHANNEL_LINK + str(s.id)}})
+        post_collection.update_one({"_id": ObjectId(post_id)}, {"$set": {"conf": True, "in_channel": True, "msg_link": config.CHANNEL_LINK + "/" + str(s.id)}})
         btns = [
             [
                 Button.inline(bot_text["delete_post"], str.encode("delete_post:" + str(find_post["_id"])))
